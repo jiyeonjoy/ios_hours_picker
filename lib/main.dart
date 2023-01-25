@@ -1,115 +1,256 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:ios_hours_picker/ios_hours_picker.dart';
 
-void main() {
-  runApp(const MyApp());
-}
+const double _kItemExtent = 32.0;
+const List<String> _fruitNames = <String>[
+  'Apple',
+  'Mango',
+  'Banana',
+  'Orange',
+  'Pineapple',
+  'Strawberry',
+];
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+void main() => runApp(const CupertinoPickerApp());
 
-  // This widget is the root of your application.
+class CupertinoPickerApp extends StatelessWidget {
+  const CupertinoPickerApp({super.key});
+
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // Try running your application with "flutter run". You'll see the
-        // application has a blue toolbar. Then, without quitting the app, try
-        // changing the primarySwatch below to Colors.green and then invoke
-        // "hot reload" (press "r" in the console where you ran "flutter run",
-        // or simply save your changes to "hot reload" in a Flutter IDE).
-        // Notice that the counter didn't reset back to zero; the application
-        // is not restarted.
-        primarySwatch: Colors.blue,
-      ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+    return const MaterialApp(
+      home: CupertinoPickerExample(),
     );
   }
 }
 
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
-
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
-
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
-
-  final String title;
+class CupertinoPickerExample extends StatefulWidget {
+  const CupertinoPickerExample({super.key});
 
   @override
-  State<MyHomePage> createState() => _MyHomePageState();
+  State<CupertinoPickerExample> createState() => _CupertinoPickerExampleState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
+class _CupertinoPickerExampleState extends State<CupertinoPickerExample> {
+  int _selectedFruit = 0;
 
-  void _incrementCounter() {
-    setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
-    });
+  void _showDialog(Widget child) {
+    showCupertinoModalPopup<void>(
+        context: context,
+        builder: (BuildContext context) => Container(
+              height: 216,
+              padding: const EdgeInsets.only(top: 6.0),
+              margin: EdgeInsets.only(
+                bottom: MediaQuery.of(context).viewInsets.bottom,
+              ),
+              color: CupertinoColors.systemBackground.resolveFrom(context),
+              child: SafeArea(
+                top: false,
+                child: child,
+              ),
+            ));
   }
 
   @override
   Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
-    return Scaffold(
-      appBar: AppBar(
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
-        title: Text(widget.title),
+    return CupertinoPageScaffold(
+      navigationBar: const CupertinoNavigationBar(
+        middle: Text('CupertinoPicker Sample'),
       ),
-      body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
-        child: Column(
-          // Column is also a layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Invoke "debug painting" (press "p" in the console, choose the
-          // "Toggle Debug Paint" action from the Flutter Inspector in Android
-          // Studio, or the "Toggle Debug Paint" command in Visual Studio Code)
-          // to see the wireframe for each widget.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            const Text(
-              'You have pushed the button this many times:',
+      child: DefaultTextStyle(
+          style: TextStyle(
+            color: CupertinoColors.label.resolveFrom(context),
+            fontSize: 22.0,
+          ),
+          child: SizedBox(
+            width: double.infinity,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Divider(),
+                CupertinoButton(
+                  onPressed: () => _showDialog(
+                    CupertinoPicker(
+                      magnification: 1.22,
+                      squeeze: 1.2,
+                      useMagnifier: true,
+                      itemExtent: _kItemExtent,
+                      onSelectedItemChanged: (int selectedItem) {
+                        setState(() {
+                          _selectedFruit = selectedItem;
+                        });
+                      },
+                      children: List<Widget>.generate(_fruitNames.length,
+                          (int index) {
+                        return Center(
+                          child: Text(
+                            _fruitNames[index],
+                          ),
+                        );
+                      }),
+                    ),
+                  ),
+                  child: Text(
+                    _fruitNames[_selectedFruit],
+                    style: const TextStyle(
+                      fontSize: 22.0,
+                    ),
+                  ),
+                ),
+                const Divider(),
+                CupertinoButton(
+                  padding: EdgeInsets.zero,
+                  onPressed: () => _showDialog(
+                    CupertinoDatePicker(
+                      mode: CupertinoDatePickerMode.dateAndTime,
+                      onDateTimeChanged: (DateTime date) {},
+                    ),
+                  ),
+                  child: const Text(
+                    'CupertinoDatePicker dateAndTime',
+                    style: TextStyle(
+                      fontSize: 22.0,
+                    ),
+                  ),
+                ),
+                CupertinoButton(
+                  padding: EdgeInsets.zero,
+                  onPressed: () => _showDialog(
+                    CupertinoDatePicker(
+                      mode: CupertinoDatePickerMode.time,
+                      onDateTimeChanged: (DateTime date) {},
+                    ),
+                  ),
+                  child: const Text(
+                    'CupertinoDatePicker time',
+                    style: TextStyle(
+                      fontSize: 22.0,
+                    ),
+                  ),
+                ),
+                CupertinoButton(
+                  padding: EdgeInsets.zero,
+                  onPressed: () => _showDialog(
+                    CupertinoDatePicker(
+                      mode: CupertinoDatePickerMode.date,
+                      onDateTimeChanged: (DateTime date) {},
+                    ),
+                  ),
+                  child: const Text(
+                    'CupertinoDatePicker date',
+                    style: TextStyle(
+                      fontSize: 22.0,
+                    ),
+                  ),
+                ),
+                const Divider(),
+                CupertinoButton(
+                  padding: EdgeInsets.zero,
+                  onPressed: () => _showDialog(
+                    CupertinoTimerPicker(
+                      mode: CupertinoTimerPickerMode.hm,
+                      onTimerDurationChanged: (Duration duration) {},
+                    ),
+                  ),
+                  child: const Text(
+                    'CupertinoTimerPicker hm',
+                    style: TextStyle(
+                      fontSize: 22.0,
+                    ),
+                  ),
+                ),
+                CupertinoButton(
+                  padding: EdgeInsets.zero,
+                  onPressed: () => _showDialog(
+                    CupertinoTimerPicker(
+                      mode: CupertinoTimerPickerMode.hms,
+                      onTimerDurationChanged: (Duration duration) {},
+                    ),
+                  ),
+                  child: const Text(
+                    'CupertinoTimerPicker hms',
+                    style: TextStyle(
+                      fontSize: 22.0,
+                    ),
+                  ),
+                ),
+                CupertinoButton(
+                  padding: EdgeInsets.zero,
+                  onPressed: () => _showDialog(
+                    CupertinoTimerPicker(
+                      mode: CupertinoTimerPickerMode.ms,
+                      onTimerDurationChanged: (Duration duration) {},
+                    ),
+                  ),
+                  child: const Text(
+                    'CupertinoTimerPicker ms',
+                    style: TextStyle(
+                      fontSize: 22.0,
+                    ),
+                  ),
+                ),
+                const Divider(),
+                CupertinoButton(
+                  padding: EdgeInsets.zero,
+                  onPressed: () => _showDialog(
+                    CupertinoHoursPicker(
+                      onTimerHoursChanged: (int hour) {},
+                    ),
+                  ),
+                  child: const Text(
+                    'CupertinoHoursPicker',
+                    style: TextStyle(
+                      fontSize: 22.0,
+                    ),
+                  ),
+                ),
+                CupertinoButton(
+                  padding: EdgeInsets.zero,
+                  onPressed: () => showModalBottomSheet(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return Container(
+                          child: Wrap(
+                            children: <Widget>[
+                              Container(
+                                height: 216,
+                                padding: const EdgeInsets.only(
+                                  top: 20,
+                                  bottom: 16,
+                                ),
+                                child: CupertinoHoursPicker(
+                                  onTimerHoursChanged: (int hours) {},
+                                ),
+                              ),
+                              Container(
+                                padding: const EdgeInsets.only(
+                                  bottom: 34,
+                                  left: 24,
+                                  right: 24,
+                                ),
+                                child: CupertinoButton(
+                                  child: const Text('확인'),
+                                  onPressed: () {
+                                    Navigator.pop(context);
+                                  },
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      }),
+                  child: const Text(
+                    'CupertinoHoursPicker',
+                    style: TextStyle(
+                      fontSize: 22.0,
+                    ),
+                  ),
+                ),
+                const Divider(),
+              ],
             ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headline4,
-            ),
-          ],
-        ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
+          )),
     );
   }
 }
